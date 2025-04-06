@@ -11,7 +11,7 @@ export async function DELETE(
   try {
     const positions = await prismadb.task.deleteMany({
       where: {
-        id: parseInt(params.id.toString()),
+        id: await parseInt(params.id.toString()),
       },
     });
     await prismadb.$disconnect();
