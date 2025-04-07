@@ -18,7 +18,7 @@ export const DeleteButton:React.FC<TaskId> =({id})=>{
       try {
         await axios.delete(`/api/task/${id}`);
         router.refresh();
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
         console.log(error);
         setLoading(false)

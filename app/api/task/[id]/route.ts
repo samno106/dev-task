@@ -1,4 +1,5 @@
 import { prismadb } from "@/lib/prismadb";
+import { revalidatePath } from "next/cache";
 
 export async function DELETE(
   req: Request,
@@ -14,6 +15,7 @@ export async function DELETE(
         id: await parseInt(params.id.toString()),
       },
     });
+    revalidatePath("/");
     await prismadb.$disconnect();
     return Response.json(positions);
   } catch (error) {

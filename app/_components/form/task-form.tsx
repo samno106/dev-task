@@ -35,11 +35,13 @@ const formSchema = z.object({
 });
 
 interface OnlineModeProps{
-  onlineMode:boolean
+  onlineMode:boolean;
+  setTasks:()=>void;
 }
 
 
-export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode}) => {
+export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode, setTasks}) => {
+  
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -62,14 +64,21 @@ export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode}) => {
       
       setLoading(true);
       if(onlineMode){
+
         await axios.post("/api/task", values);
+        
+        form.reset();
+        router.refresh();
+
+        const data = await axios.get("/api/task");
+        setTasks(data);
+        
       }else{
 
         await db.query(`INSERT INTO task (title, status) VALUES ($1,$2);`, [values.title,values.status])
       
       }
-      form.reset();
-      router.refresh();
+      
     } catch (error) {
       console.log(error);
     } finally {

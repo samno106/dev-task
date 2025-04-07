@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 export async function GET(req: Request){
 
   try {
-
+    
     const task = await prismadb.task.findMany();
+
     await prismadb.$disconnect();
     return Response.json(task);
   } catch (error) {
