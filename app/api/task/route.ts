@@ -1,10 +1,8 @@
 import { prismadb } from "@/lib/prismadb";
 import { revalidatePath } from "next/cache";
 
-export async function GET(req: Request){
-
+export async function GET(req: Request) {
   try {
-    
     const task = await prismadb.task.findMany();
 
     await prismadb.$disconnect();
@@ -14,7 +12,6 @@ export async function GET(req: Request){
     return new Response("Internal error", { status: 500 });
   }
 }
-
 
 export async function POST(req: Request) {
   try {

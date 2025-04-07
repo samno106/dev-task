@@ -9,29 +9,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CheckCircle2Icon,
-  LoaderIcon,
-  X,
-} from "lucide-react";
+import { CheckCircle2Icon, LoaderIcon, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DeleteButton from "./_components/delete-button";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { PGlite } from "@electric-sql/pglite";
 
 interface Task {
-  id:number;
-  title:string;
-  status:string;
-  created:string;
+  id: number;
+  title: string;
+  status: string;
+  created: string;
 }
-
 
 interface TaskProps {
   tasks: Task[];
 }
 
 export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
-  
   return (
     <Table>
       {tasks.length == 0 ? (
@@ -69,11 +65,9 @@ export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
                 {task.status}
               </Badge>
             </TableCell>
-            <TableCell>
-              {/* {task.createdAt.toDateString()} */}
-            </TableCell>
+            <TableCell>{/* {task.createdAt.toDateString()} */}</TableCell>
             <TableCell className="text-right">
-              <DeleteButton id={task.id}/>
+              <DeleteButton id={task.id} />
             </TableCell>
           </TableRow>
         ))}

@@ -7,6 +7,7 @@ import TaskTable from "./table/task-table";
 import { PGlite } from "@electric-sql/pglite";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { getTasks } from "@/lib/db";
 
 interface Task {
   id: number;
@@ -16,83 +17,47 @@ interface Task {
 }
 
 export const ClientTask = () => {
+  const [isOnline, setIsOnline] = useState(true);
 
-  const [tasks, setTasks] = useState<Task[] | unknown>([]);
-
-  const [onlineMode, setOnlineMod] = useState(true);
-
-
-  async function getRecordOnline(){
-      console.log(onlineMode)
-    if(onlineMode){
-      await axios.get("/api/task").then(({data})=>{
-        setTasks(data);
-      });
-    }else{
-
-      const db = new PGlite("idb://task-db");
-      const result = await db.query(`SELECT * FROM task;`);
-      setTasks(result.rows);
-
-    }
-   
-
-  }
-
-  async function getRecordOffline(){
-    const db = new PGlite("idb://task-db");
-    const result = await db.query(`SELECT * FROM task;`);
-    setTasks(result.rows);
-  }
-
-  async function initializeDB() {
-
-    const db = new PGlite("idb://task-db");
-
-    await db.query(
-      `CREATE TABLE IF NOT EXISTS task (id SERIAL PRIMARY KEY, title VARCHAR(255), status VARCHAR(255), created TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`
-    );
-
-  }
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    setOnlineMod(navigator.onLine);
+    setIsOnline(navigator.onLine);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-    window.addEventListener("online", () => {
-      setOnlineMod(true);
-    });
-    window.addEventListener("offline", () => {
-      setOnlineMod(false);
-
-    });
-
-    initializeDB();
-
-    getRecordOnline();   
-
-    // return () => {
-    //   window.removeEventListener("online", () => {
-    //     setOnlineMod(true);
-    //     router.refresh();
-    //   });
-    //   window.removeEventListener("offline", () => {
-    //     setOnlineMod(false);
-    //     router.refresh();
-    //   });
-    // };
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
+
+  useEffect(() => {
+    loadTask();
+  }, [isOnline]);
+
+  const loadTask = async () => {
+    try {
+      if (isOnline) {
+        await axios.get("/api/task").then(({ data }) => {
+          setTasks(data);
+        });
+      } else {
+        const data = await getTasks(isOnline);
+        setTasks(data.rows as Task[]);
+      }
+    } catch (error) {}
+  };
 
   return (
     <div className="grid grid-rows items-center justify-items-center min-h-screen px-8 pb-20 gap-16 ">
       <nav className="py-3 px-24 w-full flex justify-end">
         <div className="flex items-center space-x-2">
-          <Switch
-            id="airplane-mode"
-            checked={onlineMode}
-         
-          />
-          {onlineMode ? (
+          <Switch id="airplane-mode" checked={isOnline} />
+          {isOnline ? (
             <label
               htmlFor="airplane-mode"
               className="text-sm font-medium text-green-500"
@@ -115,7 +80,7 @@ export const ClientTask = () => {
             Dev Task
           </h2>
           <div className=" py-5 rounded-lg mt-2 w-full  flex justify-center">
-            <TaskForm onlineMode={onlineMode} setTasks={setTasks} />
+            <TaskForm isOnline={isOnline} loadTask={loadTask} />
           </div>
         </div>
         <div className="py-3 border-t">

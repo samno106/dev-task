@@ -23,7 +23,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader, Plus } from "lucide-react";
-import { PGlite } from '@electric-sql/pglite'
+import { PGlite } from "@electric-sql/pglite";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -34,15 +34,12 @@ const formSchema = z.object({
   }),
 });
 
-interface OnlineModeProps{
-  onlineMode:boolean;
-  setTasks:()=>void;
+interface OnlineModeProps {
+  isOnline: boolean;
+  loadTask: () => void;
 }
 
-
-export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode, setTasks}) => {
-  
-
+export const TaskForm: React.FC<OnlineModeProps> = ({ isOnline, loadTask }) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -54,31 +51,21 @@ export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode, setTasks}) => {
     },
   });
 
-  
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
     const db = new PGlite("idb://task-db");
 
     try {
-      
       setLoading(true);
-      if(onlineMode){
-
+      if (isOnline) {
         await axios.post("/api/task", values);
-        
-        form.reset();
-        router.refresh();
-
-        const data = await axios.get("/api/task");
-        setTasks(data);
-        
-      }else{
-
-        await db.query(`INSERT INTO task (title, status) VALUES ($1,$2);`, [values.title,values.status])
-      
+      } else {
+        await db.query(`INSERT INTO task (title, status) VALUES ($1,$2);`, [
+          values.title,
+          values.status,
+        ]);
       }
-      
+      loadTask();
+      form.reset();
     } catch (error) {
       console.log(error);
     } finally {
@@ -86,7 +73,6 @@ export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode, setTasks}) => {
     }
   }
 
-  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-3">
@@ -140,9 +126,6 @@ export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode, setTasks}) => {
           ) : (
             <Plus className=" size-4" />
           )}
-          {
-            onlineMode ? "Online":"Offline"
-          }
         </Button>
       </form>
     </Form>
