@@ -1,21 +1,74 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
-import React, { useState } from "react";
-import TaskForm from "./task-form";
-import TaskTable from "./task-table";
-import { Task } from "@prisma/client";
+import React, { useEffect, useState } from "react";
+import TaskForm from "./form/task-form";
+import TaskTable from "./table/task-table";
+import { PGlite } from "@electric-sql/pglite";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-interface TaskProps {
-  tasks: Task[];
+interface Task {
+  id: number;
+  title: string;
+  status: string;
+  created: string;
 }
 
-export const ClientTask: React.FC<TaskProps> = ({ tasks }) => {
+export const ClientTask = () => {
+
+  const router = useRouter();
+
+  const [tasks, setTasks] = useState<Task[] | unknown>([]);
+
   const [onlineMode, setOnlineMod] = useState(true);
 
-  const onSetMode = () => {
-    setOnlineMod(!onlineMode);
-  };
+
+  async function initializeDB() {
+    const db = new PGlite("idb://task-db");
+
+    await db.query(
+      `CREATE TABLE IF NOT EXISTS task (id SERIAL PRIMARY KEY, title VARCHAR(255), status VARCHAR(255), created TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`
+    );
+
+    if (onlineMode) {
+       await axios.get("/api/task").then(({data})=>{
+        setTasks(data);
+      });
+    
+    } else {
+      const result = await db.query(`SELECT * FROM task;`);
+      setTasks(result.rows);
+
+      console.log("result => ", result.rows);
+    }
+  }
+
+  useEffect(() => {
+    setOnlineMod(navigator.onLine);
+
+    window.addEventListener("online", () => {
+      setOnlineMod(true);
+      router.refresh();
+    });
+    window.addEventListener("offline", () => {
+      setOnlineMod(false);
+      router.refresh();
+    });
+
+    initializeDB();
+
+    return () => {
+      window.removeEventListener("online", () => {
+        setOnlineMod(true);
+        router.refresh();
+      });
+      window.removeEventListener("offline", () => {
+        setOnlineMod(false);
+        router.refresh();
+      });
+    };
+  }, []);
 
   return (
     <div className="grid grid-rows items-center justify-items-center min-h-screen px-8 pb-20 gap-16 ">
@@ -24,7 +77,7 @@ export const ClientTask: React.FC<TaskProps> = ({ tasks }) => {
           <Switch
             id="airplane-mode"
             checked={onlineMode}
-            onCheckedChange={onSetMode}
+         
           />
           {onlineMode ? (
             <label
@@ -49,7 +102,7 @@ export const ClientTask: React.FC<TaskProps> = ({ tasks }) => {
             Dev Task
           </h2>
           <div className=" py-5 rounded-lg mt-2 w-full  flex justify-center">
-            <TaskForm />
+            <TaskForm onlineMode={onlineMode} />
           </div>
         </div>
         <div className="py-3 border-t">

@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,35 +9,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Task } from "@prisma/client";
 import {
   CheckCircle2Icon,
-  Loader,
   LoaderIcon,
-  Pen,
-  Trash,
   X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import DeleteButton from "./_components/delete-button";
+
+
+interface Task {
+  id:number;
+  title:string;
+  status:string;
+  created:string;
+}
+
+
 interface TaskProps {
   tasks: Task[];
 }
 
 export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
-  const router = useRouter();
-
-  async function onDeleteItem(id: number) {
-    try {
-      await axios.delete(`/api/task/${id}`);
-      router.refresh();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
+  
   return (
     <Table>
       {tasks.length == 0 ? (
@@ -76,15 +69,11 @@ export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
                 {task.status}
               </Badge>
             </TableCell>
-            <TableCell>{task.createdAt.toDateString()}</TableCell>
+            <TableCell>
+              {/* {task.createdAt.toDateString()} */}
+            </TableCell>
             <TableCell className="text-right">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onDeleteItem(task.id)}
-              >
-                <Trash className=" size-3.5" />
-              </Button>
+              <DeleteButton id={task.id}/>
             </TableCell>
           </TableRow>
         ))}

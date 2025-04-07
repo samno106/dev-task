@@ -21,8 +21,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader, Plus } from "lucide-react";
+import { PGlite } from '@electric-sql/pglite'
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -33,7 +34,13 @@ const formSchema = z.object({
   }),
 });
 
-export const TaskForm = () => {
+interface OnlineModeProps{
+  onlineMode:boolean
+}
+
+
+export const TaskForm:React.FC<OnlineModeProps> = ({onlineMode}) => {
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -45,10 +52,22 @@ export const TaskForm = () => {
     },
   });
 
+  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+
+    const db = new PGlite("idb://task-db");
+
     try {
+      
       setLoading(true);
-      await axios.post("/api/task", values);
+      if(onlineMode){
+        await axios.post("/api/task", values);
+      }else{
+
+        await db.query(`INSERT INTO task (title, status) VALUES ($1,$2);`, [values.title,values.status])
+      
+      }
       form.reset();
       router.refresh();
     } catch (error) {
@@ -58,6 +77,7 @@ export const TaskForm = () => {
     }
   }
 
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-3">
@@ -104,13 +124,16 @@ export const TaskForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full uppercase mt-5">
+        <Button type="submit" className="w-full uppercase mt-5 cursor-pointer">
           <span>Add new</span>
           {loading ? (
             <Loader className="size-4 animate-spin" />
           ) : (
             <Plus className=" size-4" />
           )}
+          {
+            onlineMode ? "Online":"Offline"
+          }
         </Button>
       </form>
     </Form>
