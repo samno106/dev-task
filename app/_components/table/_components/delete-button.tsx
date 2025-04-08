@@ -16,13 +16,13 @@ interface TaskId {
 export const DeleteButton: React.FC<TaskId> = ({ id, loadTask, isOnline }) => {
   const [loading, setLoading] = useState(false);
 
-  async function onDeleteItem(id: number) {
+  async function onDeleteItem(id: string) {
     setLoading(true);
     try {
       if (isOnline) {
-        // await axios.delete(`/api/task/${id}`);
+        await axios.delete(`/api/task/${id}`);
       } else {
-        await deleteTask(id);
+        await deleteTask(parseInt(id, 10));
       }
 
       setLoading(false);
@@ -37,7 +37,7 @@ export const DeleteButton: React.FC<TaskId> = ({ id, loadTask, isOnline }) => {
       size="icon"
       variant="ghost"
       className="cursor-pointer"
-      onClick={() => onDeleteItem(id)}
+      onClick={() => onDeleteItem(id.toString())}
     >
       {loading ? (
         <Loader className=" size-3.5 animate-spin" />

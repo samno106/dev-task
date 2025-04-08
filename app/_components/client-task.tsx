@@ -53,7 +53,9 @@ export const ClientTask = () => {
         });
       } else {
         const data = await getTasks();
+
         setTasks(data.rows as Task[]);
+        console.log("offline=>", data.rows);
       }
     } catch (error) {
       console.log("Error 1=>", error);

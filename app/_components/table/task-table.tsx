@@ -12,9 +12,7 @@ import {
 import { CheckCircle2Icon, Loader, LoaderIcon, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DeleteButton from "./_components/delete-button";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { PGlite } from "@electric-sql/pglite";
+import React from "react";
 
 interface Task {
   id: number;
@@ -48,7 +46,7 @@ export const TaskTable: React.FC<TaskProps> = ({
               <TableHead>#</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
+
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,7 +70,7 @@ export const TaskTable: React.FC<TaskProps> = ({
                     {task.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{/* {task.createdAt.toDateString()} */}</TableCell>
+
                 <TableCell className="text-right">
                   <DeleteButton
                     id={task.id}
