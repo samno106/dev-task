@@ -6,12 +6,15 @@ interface Task {
   status: string;
   created: string;
 }
+interface TaskProps {
+  rows: Task[];
+}
 
 export async function syncData() {
   if (!navigator.onLine) return;
   try {
     // Get all offline changes
-    const offlineTodos = await getTasks();
+    const offlineTodos = (await getTasks()) as TaskProps;
 
     let syncStatus = offlineTodos.rows.length;
 
