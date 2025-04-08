@@ -1,6 +1,3 @@
-// lib/sync.ts
-
-import { PGlite } from "@electric-sql/pglite";
 import axios from "axios";
 import { deleteTask, getTasks } from "./db";
 interface Task {
@@ -13,20 +10,27 @@ interface Task {
 export async function syncData() {
   if (!navigator.onLine) return;
   try {
-    console.log("Data start sync...");
-  
     // Get all offline changes
     const offlineTodos = await getTasks();
 
-    if(offlineTodos){
+    let syncStatus = offlineTodos.rows.length;
+
+    if (offlineTodos.rows.length > 0) {
       for (const todo of offlineTodos.rows) {
         // Push to online database
-        await axios.post("/api/task", { title: todo.title, status: todo.status });
+        await axios.post("/api/task", {
+          title: todo.title,
+          status: todo.status,
+        });
         // Mark as synced in offline DB
         await deleteTask(todo.id);
       }
+    } else {
+      syncStatus = offlineTodos.rows.length;
     }
-   
+
+    // console.log("sync function=>", syncStatus);
+    return syncStatus;
   } catch (error) {
     console.error("Sync failed:", error);
   }
