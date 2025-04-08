@@ -1,19 +1,24 @@
 import { prismadb } from "@/lib/prismadb";
-import { revalidatePath } from "next/cache";
+
+type DeleteParams = {
+  params: {
+    id: string;
+  };
+};
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: number } }
 ) {
   try {
     const { id } = params;
 
     const task = await prismadb.task.deleteMany({
       where: {
-        id: parseInt(id, 10),
+        id: parseInt(id.toString(), 10),
       },
     });
-    revalidatePath("/");
+
     await prismadb.$disconnect();
     return Response.json(task);
   } catch (error) {
