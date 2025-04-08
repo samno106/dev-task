@@ -6,21 +6,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(await params?.id, 10);
+    const { id } = params;
 
-    if (isNaN(id)) {
-      return new Response(JSON.stringify({ error: "Invalid ID" }), {
-        status: 400,
-      });
-    }
-    const positions = await prismadb.task.deleteMany({
+    const task = await prismadb.task.deleteMany({
       where: {
-        id: id,
+        id: parseInt(id, 10),
       },
     });
     revalidatePath("/");
     await prismadb.$disconnect();
-    return Response.json(positions);
+    return Response.json(task);
   } catch (error) {
     console.log("[TASK DELETE]", error);
     return new Response("Internal error", { status: 500 });
