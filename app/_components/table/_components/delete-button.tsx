@@ -4,25 +4,35 @@ import { Loader, Trash } from "lucide-react"
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { PGlite } from "@electric-sql/pglite";
+import { deleteTask } from "@/lib/db";
 
 interface TaskId{
-    id:number
+    id:number,
+    loadTask: () => void;
+    isOnline:boolean
 }
 
-export const DeleteButton:React.FC<TaskId> =({id})=>{
+export const DeleteButton:React.FC<TaskId> =({id,loadTask,isOnline})=>{
+  
     const [loading,setLoading] =useState(false)
-    const router = useRouter();
 
     async function onDeleteItem(id: number) {
       setLoading(true)
       try {
-        await axios.delete(`/api/task/${id}`);
-        router.refresh();
+        if(isOnline){
+          await axios.delete(`/api/task/${id}`);
+        }else{
+          await deleteTask(id)
+        }
+       
         setLoading(false);
+        loadTask();
       } catch (error) {
         console.log(error);
         setLoading(false)
       }
+      
     }
     return(
         <Button

@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader, Plus } from "lucide-react";
 import { PGlite } from "@electric-sql/pglite";
+import { addTask } from "@/lib/db";
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -59,10 +60,7 @@ export const TaskForm: React.FC<OnlineModeProps> = ({ isOnline, loadTask }) => {
       if (isOnline) {
         await axios.post("/api/task", values);
       } else {
-        await db.query(`INSERT INTO task (title, status) VALUES ($1,$2);`, [
-          values.title,
-          values.status,
-        ]);
+        await addTask(values.title,values.status)
       }
       loadTask();
       form.reset();

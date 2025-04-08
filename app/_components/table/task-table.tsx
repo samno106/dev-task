@@ -25,9 +25,10 @@ interface Task {
 
 interface TaskProps {
   tasks: Task[];
+  loadTask: () => void;
+  isOnline:boolean;
 }
-
-export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
+export const TaskTable: React.FC<TaskProps> = ({ tasks,loadTask,isOnline }) => {
   return (
     <Table>
       {tasks.length == 0 ? (
@@ -67,7 +68,7 @@ export const TaskTable: React.FC<TaskProps> = ({ tasks }) => {
             </TableCell>
             <TableCell>{/* {task.createdAt.toDateString()} */}</TableCell>
             <TableCell className="text-right">
-              <DeleteButton id={task.id} />
+              <DeleteButton id={task.id} loadTask={loadTask} isOnline={isOnline} />
             </TableCell>
           </TableRow>
         ))}
