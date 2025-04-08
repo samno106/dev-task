@@ -2,17 +2,20 @@ import { prismadb } from "@/lib/prismadb";
 import { revalidatePath } from "next/cache";
 
 export async function DELETE(
-  req: Request,
-  {
-    params,
-  }: {
-    params: { id: number };
-  }
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
   try {
+    const id = parseInt(await params?.id, 10);
+
+    if (isNaN(id)) {
+      return new Response(JSON.stringify({ error: "Invalid ID" }), {
+        status: 400,
+      });
+    }
     const positions = await prismadb.task.deleteMany({
       where: {
-        id: await parseInt(params.id.toString()),
+        id: id,
       },
     });
     revalidatePath("/");

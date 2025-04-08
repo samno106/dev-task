@@ -27,22 +27,20 @@ interface TaskProps {
   tasks: Task[];
   loadTask: () => void;
   isOnline: boolean;
+  loading: boolean;
 }
 export const TaskTable: React.FC<TaskProps> = ({
   tasks,
   loadTask,
   isOnline,
+  loading,
 }) => {
   return (
     <div className="w-full">
-      {tasks.length == 0 ? (
-        isOnline ? (
-          <div className=" flex justify-center py-2 items-center">
-            <Loader className=" animate-spin size-5" />
-          </div>
-        ) : (
-          ""
-        )
+      {loading ? (
+        <div className=" flex justify-center py-2 items-center">
+          <Loader className=" animate-spin size-5" />
+        </div>
       ) : (
         <Table>
           <TableHeader>

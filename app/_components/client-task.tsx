@@ -17,6 +17,7 @@ interface Task {
 }
 
 export const ClientTask = () => {
+  const [loading, setLoading] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -41,6 +42,7 @@ export const ClientTask = () => {
 
   const loadTask = async () => {
     try {
+      setLoading(true);
       if (isOnline) {
         const syncSttatus = await syncData();
 
@@ -55,6 +57,8 @@ export const ClientTask = () => {
       }
     } catch (error) {
       console.log("Error 1=>", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,7 +104,12 @@ export const ClientTask = () => {
           </div>
         </div>
         <div className="py-3 border-t w-full">
-          <TaskTable tasks={tasks} loadTask={loadTask} isOnline={isOnline} />
+          <TaskTable
+            tasks={tasks}
+            loadTask={loadTask}
+            isOnline={isOnline}
+            loading={loading}
+          />
         </div>
       </main>
     </div>
