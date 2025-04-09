@@ -1,4 +1,4 @@
-// app/api/users/[id]/route.ts
+
 import { prismadb } from "@/lib/prismadb";
 import { NextResponse } from "next/server";
 

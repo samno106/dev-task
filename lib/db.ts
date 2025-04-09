@@ -16,8 +16,10 @@ async function getDB() {
 
 async function initSchema(db: PGlite) {
   await db.query(
-    `CREATE TABLE IF NOT EXISTS task (id SERIAL PRIMARY KEY, title VARCHAR(255), status VARCHAR(255), createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMPs);`
+    `CREATE TABLE IF NOT EXISTS task (id SERIAL PRIMARY KEY, title VARCHAR(255), status VARCHAR(255), createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`
   );
+
+  // await db.query(`DROP TABLE task;`);
 }
 
 export async function query(sql: string, params?: any[]) {
